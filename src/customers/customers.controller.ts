@@ -26,5 +26,9 @@ export class CustomersController {
     return this.customersService.getCustomerDetails(id);
   }
 
+  @Get('show-all-customers')
+  getAllCustomers() {
+    return this.customersService.getAllCustomers();
+  }
 
 }

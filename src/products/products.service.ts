@@ -117,9 +117,9 @@ export class ProductsService {
 
     //MOSTRAR TODOS LOS PRODUSTOS
     async getAllProducts(){
-        const product = await this.stripe.products.list();
+        const products = await this.stripe.products.list();
         
-        return product.data
+        return products.data
     }
 
 }
