@@ -32,5 +32,26 @@ export class CustomersService {
     return deletedCustomer;
   }
 
+  //Mostrar el detalle de un customer en especifico
+  async getCustomerDetails(customerId: string) {
+    try {
+        // Obtener el producto
+        const customer = await this.stripe.customers.retrieve(customerId);
+
+        // Devuelve el customer con detalles del precio
+        return customer;
+    } catch (error) {
+        throw new Error(`Failed to retrieve product details: ${error.message}`);
+    }
+}
+
+//Mostrar todos los customers
+//MOSTRAR TODOS LOS PRODUSTOS
+async getAllCustomers(){
+  const customers = await this.stripe.customers.list();
+  
+  return customers.data
+}
+
   
 }
