@@ -97,3 +97,13 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Activate the hookdeck on cmd:
+```bash
+$ hookdeck listen 3003 stripe-to-localhost // Last is the name of connection
+```
+
+## Test the webhook Stripe on localhost
+```bash
+$ stripe listen --forward-to localhost:3003/payments/webhook // Add the localhost link
+```
