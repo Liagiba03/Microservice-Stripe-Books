@@ -4,11 +4,11 @@ import { ArrayMinSize, IsArray, IsNumber, IsPositive, IsString, ValidateNested }
 export class PaymentSessionDto {
 
     @IsString()
-    orderId: string
-
+    customerId: string
 
     @IsString()
-    currency: string
+    productId: string
+
 
     @IsArray()
     @ArrayMinSize(1)
@@ -20,13 +20,12 @@ export class PaymentSessionDto {
 export class PaymentSessionItemDto {
     //Se crea un dto por cada información de endpoint que se va a recibir
     @IsString()
-    name: string;
-
-    @IsNumber()
-    @IsPositive()
-    price: number;
+    productId: string;
 
     @IsNumber()
     @IsPositive()
     quantity: number;
+
+    @IsString()
+    currency: string
 }
