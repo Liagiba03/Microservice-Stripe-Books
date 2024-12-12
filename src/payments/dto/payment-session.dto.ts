@@ -6,10 +6,6 @@ export class PaymentSessionDto {
     @IsString()
     customerId: string
 
-    @IsString()
-    productId: string
-
-
     @IsArray()
     @ArrayMinSize(1)
     @ValidateNested() //También valida el método al que llama
@@ -25,7 +21,4 @@ export class PaymentSessionItemDto {
     @IsNumber()
     @IsPositive()
     quantity: number;
-
-    @IsString()
-    currency: string
 }
