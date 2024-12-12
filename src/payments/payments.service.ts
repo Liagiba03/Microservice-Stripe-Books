@@ -11,43 +11,60 @@ export class PaymentsService {
         envs.stripeSecret
     )
 
-    async createPaymentSession( paymentSessionDto: PaymentSessionDto){
-
-        // Se toman los datos
-        const {currency, items, orderId} = paymentSessionDto;
-
-        //Retorna el objeto que queremos crear para mandarlo
-        const lineItems = items.map( item => {
-            return {
-                price_data: {
-                    currency: currency,
-                    product_data: {
-                        name: item.name
-                    },
-                    unit_amount: Math.round( item.price * 100)   //Entero con decimales(centavos) Le quita los decimales y lo rendondea
-                },
-                quantity: item.quantity
-            }
-        })
-
-
-        const session = await this.stripe.checkout.sessions.create({
-            // Colocar el id de la orden 
-            // Se coloca toda la informacion a enviar a stripe
-            payment_intent_data: {
-                metadata: {
-                    orderId : orderId
-                }
-            },
-
-            line_items: lineItems,
-            mode:'payment', // Se puede cambiar por subscrption
-            success_url: envs.stripeSuccessUrl,
-            cancel_url: envs.stripeCancelUrl
+    //Metodo tomar precios
+    async searchPrices(productId){
+        // Consultar los precios asociados al producto en Stripe
+        const prices = await this.stripe.prices.list({
+            product: productId, // Filtrar precios por el ID del producto
+            active: true, // Solo precios activos
+            limit: 1, // Obtener solo un precio
         });
+        if (prices.data.length === 0) {
+            throw new Error(`No active price found for productId: ${productId}`);
+        }
 
+        const price = prices.data[0]; // Obtener el precio activo
+        const unitAmount = price.unit_amount; // Cantidad en centavos
+        const currency = price.currency; // Moneda asociada al precio
+
+        return {
+            unitAmount : unitAmount,
+            currency: currency
+        }
+    }
+
+    async createPaymentSession(paymentSessionDto: PaymentSessionDto) {
+        // Se toman los datos
+        const { items, customerId } = paymentSessionDto;
+    
+        // Usar Promise.all para manejar las promesas en paralelo
+        const lineItems = await Promise.all(
+            items.map(async (item) => {
+                const detailsProduct = await this.searchPrices(item.productId);
+                return {
+                    price_data: {
+                        currency: detailsProduct.currency,
+                        product_data: {
+                            name: item.productId, // Asegúrate de incluir un nombre si es necesario
+                        },
+                        unit_amount: detailsProduct.unitAmount, // Ya está en centavos
+                    },
+                    quantity: item.quantity,
+                };
+            })
+        );
+    
+        const session = await this.stripe.checkout.sessions.create({
+            customer: customerId, // Asignar el cliente de Stripe
+            line_items: lineItems, // Usar los lineItems construidos
+            mode: 'payment', // Configurado para pago único
+            success_url: envs.stripeSuccessUrl,
+            cancel_url: envs.stripeCancelUrl,
+        });
+    
         return session;
     }
+    
 
 
     async stripeWebhook( req: Request, res: Response){
